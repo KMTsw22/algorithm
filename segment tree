@@ -1,0 +1,66 @@
+#include <iostream>
+#include <vector>
+
+using namespace std;
+int M, N, K;
+long long A, a ,b, c;
+
+vector<long long> graph(1000001);
+vector<long long> tree(4000004);
+
+long long init(vector<long long> &graph, vector<long long> &tree, int node, int start, int end){
+    if (start == end){
+        return tree[node] = graph[start];
+    }
+    int mid = (start + end) / 2;
+    return tree[node] = init(graph, tree, node * 2, start, mid)
+            + init(graph, tree, node * 2 + 1, mid + 1, end);
+}
+
+long long sum(vector<long long> &tree, int node, int start, int end, int left, int right) {
+    //case1: start보다 오른쪽이 더 작은 경우 or 끝이 왼쪽 보다 큰경우
+    if (left > end || right < start) return 0;
+    //case2: 왼쪽 < start < end < 오른쪽인 경우
+    if (left <= start && end <= right) return tree[node];
+
+    int mid = (start + end) / 2;
+    return sum(tree, node * 2, start, mid, left, right) + sum(tree, node * 2 + 1, mid + 1, end, left, right);
+    }
+
+
+void update(vector<long long> &tree, int node, int start, int end, int idx, long long diff) {
+    if (idx < start || idx > end) return;
+
+    if (start == end) {
+        tree[node] = diff;
+        return;
+    }
+
+    //리프노드가 아닌 경우 자식도 변경 해야함.
+    //리프 노드인지 보고 아니면 자식 노드 갱신
+    int mid = (start + end) /2;
+    update(tree,node * 2, start, mid, idx, diff);
+    update(tree,node * 2 + 1, mid + 1, end, idx, diff);
+    tree[node] = tree[node*2] + tree[node*2+1];
+}
+
+int main(void){
+    scanf("%d %d %d", &N, &M, &K);
+    for (int i =1; i <= N; i++){
+        scanf("%lld", &A);
+        graph[i] = A;
+
+    }
+    init(graph, tree, 1, 1, N);
+
+    for (int i = 0; i < M+K;i++){
+        scanf("%lld %lld %lld", &a, &b, &c);
+        if (a == 1LL){
+            update(tree, 1, 1, N, b, c);
+        }
+        else {
+            cout << sum(tree,1, 1, N, b, c) << endl;
+        }
+    }
+
+}

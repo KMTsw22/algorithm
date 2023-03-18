@@ -1,0 +1,60 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#define endl "\n"
+using namespace std;
+vector<int> graph(500001);
+vector<int> tree[2000004];
+
+//머지 소트 트리
+
+void set_mergetree(int node, int start, int end){
+    vector<int> &cur = tree[node];
+    //리프 노드 는 자기꺼만 [자기꺼] 이렇게 담음
+    if (start == end){
+        cur.push_back(graph[start]);
+        return;
+    }
+    int mid = (start + end) / 2;
+    //밑으로 내려가면서 트리 확장
+    set_mergetree(node *2, start, mid);
+    set_mergetree(node*2, mid +1, end);
+    //저장하기
+    vector<int> &left = tree[node*2];
+    vector<int> &right = tree[node*2 +1];
+    //각 mergetree의 크기를 정해줄거임
+    cur.resize(left.size()+ right.size());
+    //합쳐지면서 정렬됨(왼쪽첨,왼쪽끝, 오른쪽첨,오른쪽끝, 더하고싶은곳(cur.begin은 []임)
+    merge(left.begin(),left.end(), right.begin(),right.end(),cur.begin());
+}
+int sum(int node, int start, int end, int l, int r, int x){
+    //범위 벗어난경우 return;
+    if (l > end || r < start) return 0;
+    //범위 완전 포함된경우 return 하는데 이진탐색으로 몇번쨰 인덱스인지 리턴
+    if (l <= start && end <= r) {
+        //lower bound => 이진탐색으로 (정렬되어있어야함)원소를 탐색
+        return lower_bound(tree[node].begin(), tree[node].end(), x) - tree[node].begin();
+    }
+    //세그 트리랑 똑같은 원리
+    int mid = (start + end) /2;
+    return (tree[node].size() - sum(node * 2, start, mid, l,r,x)+ sum(node*2+1,mid+1,end,l,r,x));
+
+}
+int N, M, A,i,j,k, total;
+int main(){
+    ios_base::sync_with_stdio(false);
+    cin.tie(0);
+    cin >> N;
+
+    for (int i=1;i<=N;i++){
+        cin >> A;
+        graph[i]=A;
+    }
+    set_mergetree(1,1,N);
+    for (int i=1;i<=N;i++){
+        total +=  sum(1,1,N,1,N,i);
+
+    }
+    cout <<total<<endl;
+
+}

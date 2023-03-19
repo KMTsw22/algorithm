@@ -1,0 +1,88 @@
+#include <iostream>
+#include <vector>
+#define endl "\n"
+using namespace std;
+
+vector<long long> graph(1000001);
+vector<long long> tree(4000004);
+vector<long long> lazy(4000004);
+//INIT 부분세그랑 똑같음
+long long init(vector<long long> &graph, vector<long long> &tree,int node,int start, int end){
+    if (start==end)
+        return tree[node]=graph[start];
+    int mid =(start+end)/2;
+    return tree[node]= init(graph,tree,node*2,start,mid)+ init(graph,tree,node*2+1,mid+1,end);
+}
+//lazy라는 벡터에 레이지 저장하는거임
+void update_lazy(vector<long long> &tree, vector<long long> &lazy, int node, int start, int end){
+    //레이지가 0이 아닌경우
+    if (lazy[node] != 0){
+        //트리 원래값에서 자식 개수 * 레이지 값 만큼 뺴주고
+        tree[node] += (end - start +1) * lazy[node];
+        //start==end인경우는 끝내고 아닌경우는 밑에 자식 노드한테 lazy 전달
+        if (start != end){
+            lazy[node*2] += lazy[node];
+            lazy[node*2+1] += lazy[node];
+        }
+        //본인을 쓸모없어짐 다음을 위해 없애줌
+        lazy[node]=0;
+    }
+}
+
+// 범위 설정하는 부분
+void update_range(vector<long long> &tree, vector<long long> &lazy,int node,int start,int end,int left, int right, long long diff){
+    update_lazy(tree,lazy,node,start,end);
+    //범위 포함 x
+    if (left >end || right < start) return;
+    //벙위에 전부 포함되는경우 (한번만 진행 그 밑에 자식들은 update_lazy부분에서 해줄거임)
+    if (left <= start && end <= right){
+        //자식 개수 * diff 트리에 더함
+        tree[node] += (end-start+1) * diff;
+        if (start != end){
+            lazy[node*2] += diff;
+            lazy[node*2+1] += diff;
+        }
+        return;
+    }
+    int mid=(start+end)/2;
+    //왼쪽 오른쪾 계속 감
+    update_range(tree,lazy,node*2,start,mid,left,right,diff);
+    update_range(tree,lazy,node*2+1,mid+1,end,left,right,diff);
+    tree[node]=tree[node*2]+tree[node*2+1];
+}
+long long sum(vector<long long> &tree, vector<long long> &lazy,int node, int start, int end, int left,int right){
+    //update_lazy 뺴고 세그랑 같음 레이지가 남아있다면 부분을 더해주는거임
+    update_lazy(tree,lazy,node,start,end);
+    if (left > end || right < start) return 0;
+    if (left <= start && right >=end) return tree[node];
+    int mid=(start+end)/2;
+    return sum(tree, lazy,node*2, start,mid,left,right)+ sum(tree,lazy,node*2+1,mid+1,end,left,right);
+
+}
+long long N, M, K, A, a, b, c,d;
+int main(void){
+    ios_base::sync_with_stdio(false);
+    cin.tie(0);
+    cout.tie(0);
+
+    cin >> N >> M >> K;
+    for (int i=1;i<=N;i++){
+        cin >> A;
+        graph[i]=A;
+    }
+    init(graph,tree,1,1,N);
+    for (int i=1;i<=M+K;i++){;
+
+        cin >> a;
+        if (a==1){
+            cin >> b >> c >> d;
+            update_range(tree,lazy,1,1,N,b,c,d);
+        }
+        else{
+            cin >> b >>c;
+            cout << sum(tree,lazy,1,1,N,b,c) << endl;
+
+        }
+
+    }
+}

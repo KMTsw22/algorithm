@@ -1,0 +1,45 @@
+#include <iostream>
+#include <vector>
+#include <queue>
+#define INF 999999
+#define endl "\n"
+using namespace std;
+vector<vector<int>> graph;
+
+vector<int> Dijkstra_(int start, int V, vector<pair<int, int>> graph[]){
+    vector<int> dist (V + 1, INF);
+    dist[start] = 0;
+    priority_queue<pair<int ,int>> pq;
+    pq.push(make_pair(0, start));
+    while (!pq.empty()){
+        int cost = -pq.top().first;
+        int now = pq.top().second;
+        pq.pop();
+        for (int i=0; i < graph[now].size(); i++){
+            int next = graph[now][i].first;
+            int nextcost = cost + graph[now][i].second;
+            if (nextcost < dist[next]){
+                dist[next] = nextcost;
+                pq.push(make_pair(-nextcost, next));
+            }
+        }
+    }
+    return dist;
+}
+int main(){
+    int V, E;
+    vector<pair<int ,int>> graph[100];
+    cin >> V;
+    cin >> E;
+    // graph 생성
+    for (int i=0;i<E;i++){
+        int from, to, cost;
+        cin >> from >> to >> cost;
+        graph[from].push_back(make_pair(to, cost));
+        graph[to].push_back(make_pair(from, cost));
+    }
+    vector<int> dist = Dijkstra_(0,V,graph);
+    for(int i=0; i < V;i++){
+        cout << dist[i] << endl;
+    }
+}

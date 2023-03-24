@@ -1,0 +1,46 @@
+#include <iostream>
+#include <vector>
+#define MAX 101
+using namespace std;
+vector<int> V[MAX]; //정점수 이중배열
+int slt[MAX]; //V가 이미 점유하고 있는정점
+bool visited[MAX]; // 처리 여부
+int n= 5; //점정수
+
+
+
+bool dfs(int x){
+    //연결된 모든 정점에 대해 들어갈 수 있는 지 시도
+    for (int i = 0; i < V[x].size();i++){
+        int p = V[x][i];
+
+        if (visited[p]) continue;
+        visited[p] = true;
+        if (slt[p] == 0 || dfs(slt[p])){
+            slt[p]= x;
+            return true;
+        }
+    }
+    return false;
+}
+int main(){
+    V[1].push_back(1);
+    V[1].push_back(3);
+    V[1].push_back(5);
+    V[2].push_back(1);
+    V[2].push_back(2);
+    V[3].push_back(5);
+    V[4].push_back(3);
+    V[5].push_back(2);
+    int cnt = 0; //매칭
+    for (int i = 1; i <= n;i++){
+        fill(visited,visited+MAX,false);
+        if (dfs(i)) cnt++;
+    }
+    for (int i = 1; i < MAX; i++) {
+        if (slt[i] != 0) {
+            printf("%d => %d\n", slt[i], i);
+        }
+    }
+}
+

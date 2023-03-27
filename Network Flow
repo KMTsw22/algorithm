@@ -1,0 +1,92 @@
+#include <iostream>
+#include <vector>
+#include <queue>
+#define MAX 100
+#define INF 10000000
+
+using namespace std;
+int result;
+int capacity[MAX][MAX]; //총 용량
+int flow[MAX][MAX]; // 현재 용량
+int visited[MAX]; //현재 정점 방문 여부
+vector<int> graph[MAX];
+void MaxFlow(int start, int end){
+    while (true){
+        fill(visited,visited+ MAX,-1);
+        queue<int> que;
+        que.push(start);
+        while (!que.empty()){
+            int x = que.front();
+            que.pop();
+            for (int i=0; i < graph[x].size();i++){
+                int j = graph[x][i]; //인접정점 가져옴
+                if (capacity[x][j]-flow[x][j] > 0 && visited[j]==-1){
+                    que.push(j);
+                    visited[j]=x; // 경로 기억
+                    if (j==end) break; // 도착지에 돋라한 경우
+                }
+            }
+        }
+        if (visited[end] == -1) break; //모든 경로를 다 찾은 경우
+        int f =INF;
+        //거꾸로 최소 유량 탐색
+        for (int i = end; i != start;i=visited[i]){
+            f = min(f,capacity[visited[i]][i] - flow[visited[i]][i]);
+        }
+        //최소 유량만큼 추가
+        for (int i= end; i != start;i=visited[i]){
+            flow[visited[i]][i] += f;
+            flow[i][visited[i]] -= f;
+        }
+        result += f;
+    }
+}
+
+int main(){
+    graph[1].push_back(2);
+    graph[2].push_back(1);
+    capacity[1][2] = 14;
+
+    graph[1].push_back(4);
+    graph[4].push_back(1);
+    capacity[1][4] = 12;
+
+    graph[2].push_back(3);
+    graph[3].push_back(2);
+    capacity[2][3] = 5;
+
+    graph[2].push_back(4);
+    graph[4].push_back(2);
+    capacity[2][4] = 4;
+
+    graph[2].push_back(5);
+    graph[5].push_back(2);
+    capacity[2][5] = 6;
+
+    graph[2].push_back(6);
+    graph[6].push_back(2);
+    capacity[2][6] = 10;
+
+    graph[3].push_back(6);
+    graph[6].push_back(3);
+    capacity[3][6] = 8;
+
+    graph[4].push_back(5);
+    graph[5].push_back(4);
+    capacity[4][5] = 11;
+
+    graph[5].push_back(3);
+    graph[3].push_back(5);
+    capacity[5][3] = 4;
+
+    graph[5].push_back(6);
+    graph[6].push_back(5);
+    capacity[5][6] = 7;
+
+
+    MaxFlow(1, 6);
+    cout << result;
+}
+//이해 안되면 메모장이랑 디버거 이용해서 하나씩 봐보기;
+//bfs이용; 
+//https://yjg-lab.tistory.com/198 참고;

@@ -1,0 +1,51 @@
+#include<iostream>
+#include<vector>
+#include<queue>
+#include<algorithm>
+#define INF 9876543219876
+#define end "\n"
+
+using namespace std;
+int N, M;
+long long dist[501];
+bool cycle; //음의 사이클을 갖는지 확인;
+vector<pair<int ,int>> graph[501];
+
+void BellmanFord(){
+    for (int i = 1 ;i <=N;i++)
+        dist[i]= INF;
+    dist[1] = 0;
+    for (int i = 1;i <= N;i++){
+        for(int j = 1; j <= N; j++){
+            for (auto now:graph[j]){
+                int next = now.first;
+
+                int cost = now.second;
+                if (dist[j] !=INF && dist[next] >dist[j] + cost){
+                    dist[next] = dist[j]+cost;
+                    if (i == N) cycle =true;
+                }
+            }
+        }
+    }
+    if (cycle) cout << -1 << endl;
+    else{
+        for (int i = 2; i <= N;i++)
+            if (dist[i] != INF)
+                cout << dist[i] << endl;
+            else
+                cout << -1 << endl;
+    }
+}
+int main(){
+    ios_base::sync_with_stdio(false);
+    cin.tie(0);
+    int A, B, C;
+    cin >> N >> M;
+    for (int i = 0;i < M;i++){
+        cin >> A >> B >> C;
+        graph[A].push_back(make_pair(B, C));
+    }
+    BellmanFord();
+
+}

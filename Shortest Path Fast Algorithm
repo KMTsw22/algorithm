@@ -1,0 +1,69 @@
+#include<iostream>
+#include<vector>
+#include<queue>
+#include<algorithm>
+
+#define INF 9876543219876
+#define endl "\n"
+#define MAXN 501
+using namespace std;
+int N, M;
+long long dist[501];
+bool InQue[501];
+int cycle[501];
+vector<pair<int ,int>> graph[501];
+
+void SPFA(int start){
+    queue<int> que;
+    que.push(start);
+    fill(dist, dist+ MAXN, INF);
+    cycle[start]++;
+    dist[start] = 0;
+    InQue[start]= true;
+    while (!que.empty()){
+        int now = que.front();
+        que.pop();
+        InQue[now] = false;
+        for (auto i : graph[now]){
+            int next = i.first;
+            int cost = i.second;
+            if (dist[next] > dist[now] + cost)
+            {
+                dist[next] = dist[now] + cost;
+                if (!InQue[next]){
+                    cycle[next]++;
+
+                    if (cycle[next] >= N){
+                        cout << "-1" << endl;
+                        return;
+                    }
+                    que.push(next);
+                    InQue[next] = true;
+                }
+            }
+        }
+
+    }
+    return;
+}
+
+
+
+int main(){
+    ios_base::sync_with_stdio(false);
+    cin.tie(0);
+    int A, B, C;
+    cin >> N >> M;
+    for (int i = 0;i < M;i++){
+        cin >> A >> B >> C;
+        graph[A].push_back(make_pair(B, C));
+    }
+    SPFA(1);
+    for (int i = 2;i <= N;i++){
+        if (dist[i] == INF) cout << "-1"<< endl;
+        else cout<< dist[i]<<endl;
+    }
+
+
+}
+// 참고 https://www.crocus.co.kr/1089

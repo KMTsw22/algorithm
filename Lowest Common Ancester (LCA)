@@ -1,0 +1,74 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <cmath>
+#define NMAX 100001
+#define endl "\n"
+using namespace std;
+
+int N,M;
+vector<int> tree[NMAX];
+int parent[NMAX][18]; //parent[i][j] i번 노드의 2^j번째 조상
+int level[100001],maxlevel;
+
+void settree(int node, int pnode, int lv){
+    level[node] = lv;
+    parent[node][0] = pnode;
+    for (int i = 1 ;i <= maxlevel;i++){
+        parent[node][i] = parent[parent[node][i - 1]][i - 1];
+    }
+    for (int i = 0; i < tree[node].size();i++){
+        int childnode = tree[node][i];
+        if (childnode == pnode) continue;
+        settree(childnode, node, lv+1);
+    }
+}
+
+int LCA(int a, int b){
+    if (a == 1 || b == 1) return 1;
+    //a, b중 level이 더 높은 즉 트리에서 더 아래거에 대한 2^K번째 조상 노드 찾아 올라감.
+    int target = a, compare = b;
+    if (level[a] < level[b]) swap(target, compare); //레벨 더 높은거를 타겟으로
+    if (level[target] != level[compare]){
+        for (int i = maxlevel;i >= 0;i--){
+            if (level[parent[target][i]] >= level[compare])
+                target = parent[target][i];
+        }
+    }
+    //동일 level 맞춰짐, 공통 조상 ㄱㄱ
+    int ret =target;
+    if (target != compare) {
+        for (int i = maxlevel; i >=0 ;i--){
+            if (parent[target][i] != parent[compare][i]){
+                target = parent[target][i];
+                compare = parent[compare][i];
+            }
+            ret = parent[target][i];
+        }
+    }
+    return ret;
+}
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(0);
+    cout.tie(NULL);
+    int T, O, A, B;
+
+    cin >> T;
+    for(int i =0; i < T - 1;i++){
+        cin >> N >> M;
+        tree[N].push_back(M);
+        tree[M].push_back(N);
+    }
+
+    maxlevel = (int)floor(log2(NMAX));
+    settree(1,0,1);
+    cin >> O;
+    for(int i=0;i < O;i++){
+        cin >> A >> B;
+        cout << LCA(A, B) <<endl;
+    }
+
+}
+// 참고 https://4legs-study.tistory.com/121

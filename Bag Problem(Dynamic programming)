@@ -1,0 +1,30 @@
+#include <iostream>
+using namespace std;
+
+int dp[101][100001];
+int item[101][2];
+int main() {
+    int N, M, K, Weight, value;
+    cin >> N >> K;
+    for (int i = 1;i <= N;i++){
+        cin >> Weight >> value;
+        item[i][0] = Weight;
+        item[i][1] = value;
+    }
+    for (int i = 1; i <= N;i++){
+        for (int w =1 ; w <= K; w++){ //w 는현재 가질수 있는 최대 무게
+            if (item[i][0] <= w){
+                if (item[i][1] + dp[i-1][w -item[i][0]] > dp[i - 1][w]){
+                    dp[i][w] = item[i][1] + dp[i-1][w-item[i][0]]; //이번거 넣고 전에꺼 뻄
+                } else dp[i][w] = dp[i - 1][w];
+            }
+            else{
+                dp[i][w] = dp[i-1][w];
+            }
+        }
+    }
+    cout << dp[N][K];
+
+
+}
+//https://jeonyeohun.tistory.com/86 참고
